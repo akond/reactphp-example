@@ -13,8 +13,6 @@ $dnsResolverFactory = new React\Dns\Resolver\Factory();
 $dnsResolver = $dnsResolverFactory->createCached('127.0.0.1', $loop);
 
 $factory = new React\HttpClient\Factory();
-echo get_class ($factory);
-exit;
 $client = $factory->create($loop, $dnsResolver);
 for ($i = 0; $i < 3; $i++)
 {

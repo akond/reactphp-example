@@ -3,11 +3,8 @@
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\EventLoop\Timer\Timer;
-use Zend\Stdlib\ArrayObject;
-
 
 require "vendor/autoload.php";
-
 
 class Context
 {
@@ -108,7 +105,10 @@ class Context
 
 		})->then (function ()
 		{
-			$this->loop->cancelTimer ($this->cancel_timer);
+			if (isset ($this->cancel_timer))
+			{
+				$this->loop->cancelTimer ($this->cancel_timer);
+			}
 		})
 			->done (function ()
 			{
@@ -138,7 +138,6 @@ class Context
 
 	protected function isAllNeedsProvided ()
 	{
-		var_export($this->unsettled);
 		return empty ($this->unsettled);
 	}
 
@@ -159,7 +158,6 @@ class Context
 			}
 			echo "resolving by timer\n";
 			$this->deferred->resolve ($this->response);
-			//posix_kill (posix_getpid (), SIGTERM);
 		});
 	}
 }
@@ -215,7 +213,12 @@ $http->on ('request', function ($request, $response) use ($loop, $twig, $client)
 	$context->must ('http://dev.akond.net/react-php/micro-service.php?a', 'a')
 		->must ('http://dev.akond.net/react-php/micro-service.php?b', 'b')
 		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'c')
-		//->should ('http://dev.akond.net/react-php/micro-service-slow.php', 'd')
+		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'f')
+		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'g')
+		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'h')
+		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'i')
+		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'j')
+		->should ('http://dev.akond.net/react-php/micro-service-slow.php', 'd')
 		->then (function ($data) use ($twig)
 		{
 			return 1;
