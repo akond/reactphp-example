@@ -117,13 +117,13 @@ class Context
 
 				$this->response->writeHead (200, $headers);
 				$this->response->end ($response);
-				posix_kill (posix_getpid (), SIGTERM);
+//				posix_kill (posix_getpid (), SIGTERM);
 			}, function ()
 			{
 				$headers = ['Content-Type' => 'text/plain'];
 				$this->response->writeHead (404, $headers);
 				$this->response->end ("Failed");
-				posix_kill (posix_getpid (), SIGTERM);
+//				posix_kill (posix_getpid (), SIGTERM);
 			});
 
 		$this->registerCancelTimer ();
@@ -209,23 +209,25 @@ $client = $factory->create ($loop, $dnsResolver);
 
 $http->on ('request', function ($request, $response) use ($loop, $twig, $client)
 {
+	$url = "http://monster.akond.dev/tmp.test.php";
 	$context = new Context($client , $loop, $response);
-	$context->must ('http://dev.akond.net/react-php/micro-service.php?a', 'a')
-		->must ('http://dev.akond.net/react-php/micro-service.php?b', 'b')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'c')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'f')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'g')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'h')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'i')
-		->must ('http://dev.akond.net/react-php/micro-service.php?c', 'j')
-		->should ('http://dev.akond.net/react-php/micro-service-slow.php', 'd')
+	$context->must ($url . '?a', 'a')
+		->must ($url . '?b', 'b')
+		->must ($url . '?c', 'c')
+		->must ($url . '?d', 'd')
+		->must ($url . '?e', 'e')
+		->must ($url . '?f', 'f')
+		->must ($url . '?g', 'g')
+		->must ($url . '?h', 'h')
+		->must ($url . '?i', 'i')
 		->then (function ($data) use ($twig)
 		{
+			return var_export($data, true);
 			return 1;
 
 			return $twig->render ('index', $data);
 		})->run ();
 });
 
-$socket->listen (1337, '10.0.0.1');
+$socket->listen (1337, '127.0.0.1');
 $loop->run ();
