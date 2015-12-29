@@ -108,6 +108,7 @@ class Context
 			if (isset ($this->cancel_timer))
 			{
 				$this->loop->cancelTimer ($this->cancel_timer);
+				unset ($this->cancel_timer);
 			}
 		})
 			->done (function ()
@@ -117,19 +118,24 @@ class Context
 
 				$this->response->writeHead (200, $headers);
 				$this->response->end ($response);
-//				posix_kill (posix_getpid (), SIGTERM);
 			}, function ()
 			{
 				$headers = ['Content-Type' => 'text/plain'];
 				$this->response->writeHead (404, $headers);
 				$this->response->end ("Failed");
-//				posix_kill (posix_getpid (), SIGTERM);
 			});
 
+		if (empty ($this->requests))
+		{
+			$this->deferred->resolve ();
+		}
+		else
+		{
 		$this->registerCancelTimer ();
 		foreach ($this->requests as $request)
 		{
 			$request->end ();
+		}
 		}
 
 		return $this;
@@ -211,6 +217,10 @@ $http->on ('request', function ($request, $response) use ($loop, $twig, $client)
 {
 	$url = "http://monster.akond.dev/tmp.test.php";
 	$context = new Context($client , $loop, $response);
+	$context->then (function () {
+		return date ('r');
+	})->run ();
+	return;
 	$context->must ($url . '?a', 'a')
 		->must ($url . '?b', 'b')
 		->must ($url . '?c', 'c')
@@ -229,5 +239,8 @@ $http->on ('request', function ($request, $response) use ($loop, $twig, $client)
 		})->run ();
 });
 
-$socket->listen (1337, '127.0.0.1');
+$interface = '127.0.0.1';
+$port = 1337;
+$socket->listen ($port, $interface);
+echo "Start listening on $interface:$port\n";
 $loop->run ();
